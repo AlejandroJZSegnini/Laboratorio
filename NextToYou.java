@@ -374,6 +374,7 @@ public class NextToYou {
         } catch (FileNotFoundException e) {
             return;
         }
+        
         compConex(graph);
     }
 }
