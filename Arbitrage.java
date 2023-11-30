@@ -223,33 +223,39 @@ class Lado {
 }
 
 public class Arbitrage {
-    public static boolean esta(String v, String[] visitados) {
-        for (String vis : visitados) {
-            if (v == vis) {
-                return true;
-            }
+    public static boolean esLado(String v, String u, Lado lado) {
+        String x = lado.getV();
+        String y = lado.getU();
+        if (x.equals(v) && y.equals(u)) {
+            return true;
+        } else {
+            return false;
         }
-        return false;
     }
 
-    public static boolean calculo(double i, int loop, String v, String u, Graph<String> graph, HashSet<Lado> lados, String[] visitados) {
-        if (loop != 0) {
+    public static boolean calculo(double i, int loop, String v, String u, Graph<String> graph, HashSet<Lado> lados, HashSet<String> visitados) {
+        if (loop != 0 && loop <= graph.size() - 1) {
             if (v == u) {
+                visitados.clear();
                 if (i > 1) {
                     return true;
                 } else {
                     return false;
                 }
-            } else if (esta(v, visitados)) {
-                return false;
             }
-        } else if (loop == graph.size()) {
+        } else if (loop >= graph.size() - 1) {
+            visitados.clear();
             return false;
         }
+        double j = i;
+        int disc = loop;
         for (String sucesor : graph.getOutwardEdges(v)) {
-            visitados[loop] = sucesor;
+            if (!visitados.add(sucesor)) {
+                return false;
+            }
+            visitados.add(sucesor);
             for (Lado lado : lados) {
-                if (lado.getV() == v && lado.getU() == sucesor) {
+                if (esLado(v, sucesor, lado)) {
                     i = i * lado.getCost();
                     loop++;
                     if (calculo(i, loop, sucesor, u, graph, lados, visitados)) {
@@ -257,14 +263,14 @@ public class Arbitrage {
                     }
                 }
             }
-            i = 1.0;
-            loop = 0;
+            i = j;
+            loop = disc;
         }
         return false;
     }
 
     public static boolean dineroFacil(Graph<String> graph, HashSet<Lado> lados) {
-        String[] visitados = new String[graph.size() - 1];
+        HashSet<String> visitados = new HashSet<String>();
         for (String moneda : graph.getAllVertices()) {
             if (calculo(1.0, 0, moneda, moneda, graph, lados, visitados)) {
                 return true;
@@ -300,7 +306,7 @@ public class Arbitrage {
             return;
         }
         if (dineroFacil(graph, lados)) {
-            System.out.println("DINERO FACIL DESDE TU CASA");
+            System.out.println("DINERO FÁCIL DESDE TU CASA");
         } else {
             System.out.println("TODO GUAY DEL PARAGUAY");
         }
